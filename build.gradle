@@ -1,57 +1,62 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-    }
-    dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT"
-    }
+plugins {
+    alias libs.plugins.fabric.loom
+    alias libs.plugins.legacy.looming
+    id "maven-publish"
 }
 
-apply plugin: "net.minecraftforge.gradle.forge"
+version = "$mod_version+$target_version"
+group = maven_group
 
-version = modVersion
-group = modGroup
-archivesBaseName = modBaseName
-
-compileJava {
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
-}
-
-minecraft {
-    version = project.forgeVersion
-    runDir = "run"
-    mappings = project.mcpVersion
+base {
+    archivesName = archives_name
 }
 
 repositories {
-    mavenCentral()
+    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots" }
+}
+
+loom {
+    decompilers {
+        vineflower {
+            options.putAll(["mark-corresponding-synthetics": "1", "ind": "    "])
+        }
+    }
+    mixin {
+        useLegacyMixinAp = false
+    }
 }
 
 dependencies {
+    minecraft libs.minecraft
+    mappings legacy.yarn(libs.versions.minecraft.get(), libs.versions.yarn.build.get())
+    modImplementation libs.fabric.loader
+    vineflowerDecompilerClasspath libs.vineflower
 }
 
 processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    from(sourceSets.main.resources.srcDirs) {
-        include "mcmod.info"
-
-        expand "version": project.version, "mcversion": project.minecraft.version
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude "mcmod.info"
+    filesMatching "fabric.mod.json", {
+        expand "version": version
     }
 }
 
-jar {
-    manifest {
-        attributes "FMLCorePlugin": "io.prplz.mousedelayfix.FMLLoadingPlugin", "ModSide": "CLIENT"
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+    if (JavaVersion.current().isJava9Compatible()) {
+        it.options.release.set(8)
     }
+}
+
+java {
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+jar {
+    from "LICENSE"
+}
+
+publishing {
+    publications.create("mavenJava", MavenPublication) {
+        from components.java
+    }
+    repositories {}
 }
