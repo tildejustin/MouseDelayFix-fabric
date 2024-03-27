@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "mousedelayfix",
+  "version": "${version}",
+  "name": "MouseDelayFix",
+  "description": "Fixes the mouse delay bug introduced in Minecraft 1.8",
+  "authors": [
+    "prplz",
+    "tildejustin"
+  ],
+  "contact": {
+    "homepage": "https://github.com/tildejustin/MouseDelayFix-fabric",
+    "sources": "https://github.com/tildejustin/MouseDelayFix-fabric",
+    "issues": "https://github.com/tildejustin/MouseDelayFix-fabric/issues"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "mixins": [
+    "mousedelayfix.mixins.json"
+  ],
+  "depends": {
+    "minecraft": ">=1.8 <1.11",
+    "fabricloader": "*"
+  }
+}
